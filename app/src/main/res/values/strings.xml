@@ -1,0 +1,23 @@
+<resources>
+  <string name="personInput">Add person</string>
+  <string name="personDetail">Edit person</string>
+  <string name="peopleList">People</string>
+  <string name="firstName">Firstname</string>
+  <string name="lastName">Lastname</string>
+  <string name="email">Email Address</string>
+  <string name="phone">Phone number</string>
+  <string name="errorCharMin">2</string>
+  <string name="errorCharMax">16</string>
+  <string name="errorFirstNameTooShort">First name is too short</string>
+  <string name="errorFirstNameTooLong">First name is too long</string>
+  <string name="errorLastNameTooShort">Last name is too short</string>
+  <string name="errorLastNameTooLong">Last name is too long</string>
+  <string name="errorEmail">Email address is invalid</string>
+  <string name="errorPhone">Phone number is invalid</string>
+  <string name="send">Send</string>
+  <string name="save">Save</string>
+  <string name="back">Back</string>
+  <string name="undoDeletePerson">Do you want to undo the persons deletion?</string>
+  <string name="undoAnswer">Yes</string>
+  <string name="app_name">ScaffoldNavigation</string>
+</resources>
