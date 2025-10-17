@@ -23,7 +23,9 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,6 +37,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import de.rogallab.mobile.Globals.ANIMATION_DURATION
 import de.rogallab.mobile.domain.entities.Person
+import de.rogallab.mobile.domain.utilities.logComp
 import de.rogallab.mobile.domain.utilities.logDebug
 import kotlinx.coroutines.delay
 /**
@@ -84,6 +87,8 @@ fun SwipePersonListItem(
    content: @Composable () -> Unit
 ) {
    val tag = "<-SwipePersonListItem"
+   val nComp = remember { mutableIntStateOf(1) }
+   SideEffect { logComp(tag, "Composition #${nComp.value++}") }
 
    var isRemoved by remember(person.id) { mutableStateOf(false) }
 

@@ -7,9 +7,17 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+//import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
+// import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import de.rogallab.mobile.domain.utilities.logComp
 import de.rogallab.mobile.domain.utilities.logDebug
 import de.rogallab.mobile.ui.navigation.Nav3ViewModel
 import de.rogallab.mobile.ui.navigation.PeopleList
@@ -26,7 +34,10 @@ fun AppNavigation(
    personViewModel: PersonViewModel,
    animationDuration: Int = 1000
 ) {
-   val tag = "<-NavigationRoot"
+   val tag = "<-AppNavigation"
+   val nComp = remember { mutableIntStateOf(1) }
+   SideEffect { logComp(tag, "Composition #${nComp.value++}") }
+
 
    // Use the navViewModel's backStack to manage navigation state
    val backStack = navViewModel.backStack
@@ -38,6 +49,9 @@ fun AppNavigation(
          navViewModel.pop()
       },
       entryDecorators = listOf(
+         rememberSaveableStateHolderNavEntryDecorator(
+            rememberSaveableStateHolder()
+         ),
          rememberViewModelStoreNavEntryDecorator()
       ),
       // Standard Android navigation animations:

@@ -48,6 +48,7 @@ class PersonViewModel(
          is PersonIntent.LastNameChange -> onLastNameChange(intent.lastName)
          is PersonIntent.EmailChange -> onEmailChange(intent.email)
          is PersonIntent.PhoneChange -> onPhoneChange(intent.phone)
+         is PersonIntent.ImageChange -> onImageChange(intent.uriString)
 
          is PersonIntent.Clear -> clearState()
          is PersonIntent.FetchById -> fetchById(intent.id)
@@ -57,7 +58,8 @@ class PersonViewModel(
          is PersonIntent.Undo -> undoRemove()
          is PersonIntent.Restored -> restored()
 
-         is PersonIntent.HandleUndoEvent -> handleUndoEvent(intent.errorState)
+         is PersonIntent.ErrorEvent -> handleErrorEvent(message = intent.message)
+         is PersonIntent.UndoEvent -> handleUndoEvent(intent.errorState)
       }
    }
    // endregion
@@ -79,7 +81,10 @@ class PersonViewModel(
       updateState(_personUiStateFlow) {
          copy(person = person.copy(phone = phone?.trim()))
       }
-
+   private fun onImageChange(uriString: String?) =
+      updateState(_personUiStateFlow) {
+         copy(person = person.copy(imagePath = uriString?.trim()))
+      }
    // clear person state and prepare for new person input
    private fun clearState() =
       updateState(_personUiStateFlow) {

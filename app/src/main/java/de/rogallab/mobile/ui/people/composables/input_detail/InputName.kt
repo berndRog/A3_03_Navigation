@@ -5,7 +5,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.text.input.ImeAction
+import de.rogallab.mobile.domain.utilities.logComp
 
 @Composable
 fun InputName(
@@ -14,6 +18,10 @@ fun InputName(
    label: String,                                     // State ↓
    validateName: (String) -> Pair<Boolean, String>    // Event ↑
 ) {
+   val tag = "<-InputName"
+   val nComp = remember { mutableIntStateOf(1) }
+   SideEffect { logComp(tag, "Composition #${nComp.value++}") }
+
    InputTextField(
       value = name,
       onValueChange = onNameChange,

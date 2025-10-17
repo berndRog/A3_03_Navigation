@@ -34,7 +34,7 @@ mockito = "5.20.0"
 mockitoKotlin = "6.1.0"
 
 # plugins
-agp = "8.13.0"
+agp = "8.12.3"
 kotlin = "2.2.20"    #"2.0.21"
 ksp = "2.2.20-2.0.3"
 

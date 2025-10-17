@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +40,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.rogallab.mobile.R
+import de.rogallab.mobile.domain.utilities.logComp
 import de.rogallab.mobile.domain.utilities.logDebug
 import de.rogallab.mobile.domain.utilities.logVerbose
 import de.rogallab.mobile.ui.errors.ErrorHandler
@@ -55,7 +57,8 @@ fun PeopleListScreen(
    onNavigatePersonDetail: (String) -> Unit = {}
 ) {
    val tag = "<-PeopleListScreen"
-   SideEffect { logVerbose(tag, "Composition") }
+   val nComp = remember { mutableIntStateOf(1) }
+   SideEffect { logComp(tag, "Composition #${nComp.value++}") }
 
    // observe the peopleUiStateFlow in the ViewModel
    val lifecycle = (LocalActivity.current as? ComponentActivity)?.lifecycle
@@ -137,7 +140,7 @@ fun PeopleListScreen(
    ) { innerPadding ->
 
       if (peopleUiState.isLoading) {
-         logDebug(tag, "Loading indicator")
+         SideEffect { logDebug(tag, "Loading indicator") }
          Box(
             modifier = Modifier
                .fillMaxSize()
@@ -147,7 +150,7 @@ fun PeopleListScreen(
             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
          }
       } else {
-         logDebug(tag, "Show Lazy Column")
+         SideEffect { logDebug(tag, "Show Lazy Column") }
 
          val undoMessage = stringResource(R.string.undoDeletePerson)
          val undoActionLabel = stringResource(R.string.undoAnswer)
@@ -164,7 +167,7 @@ fun PeopleListScreen(
                items = people,
                key = { person -> person.id }
             ) { person ->
-               logDebug(tag, "Lazy Column, size:${people.size} - Person: ${person.firstName}")
+               //SideEffect{ logDebug(tag, "Lazy Column, size:${people.size} - Person: ${person.firstName}") }
 
                SwipePersonListItem(
                   person = person,
@@ -181,7 +184,7 @@ fun PeopleListScreen(
                         },
                         withDismissAction = false
                      )
-                     viewModel.handlePersonIntent(PersonIntent.HandleUndoEvent(errorState))
+                     viewModel.handlePersonIntent(PersonIntent.UndoEvent(errorState))
                   }
                ) {
                   PersonCard(
