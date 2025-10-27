@@ -45,6 +45,9 @@ dependencies {
    implementation (libs.kotlinx.coroutines.core)
    implementation (libs.kotlinx.coroutines.android)
 
+   // Kotlin DateTime
+   implementation(libs.kotlinx.datetime)
+
    // Android Core
    // https://developer.android.com/jetpack/androidx/releases/core
    implementation(libs.androidx.core.ktx)
@@ -52,6 +55,7 @@ dependencies {
    // Ui Activity
    // https://developer.android.com/jetpack/androidx/releases/activity
    implementation(libs.androidx.activity.compose)
+   implementation(libs.androidx.compose.foundation.layout)
    // Ui Compose
    // https://developer.android.com/jetpack/compose/bom/bom-mapping
    val composeBom = platform(libs.androidx.compose.bom)
@@ -103,7 +107,6 @@ dependencies {
    implementation(libs.koin.android)
    implementation(libs.koin.androidx.compose)
 
-
    // Ktor/Kotlin JSON Serializer
    implementation(libs.kotlinx.serialization.json)
 
@@ -112,6 +115,9 @@ dependencies {
    implementation(libs.retrofit2.core)
    implementation(libs.retrofit2.gson)
    implementation(libs.retrofit2.logging)
+
+   // Google Play Services - Location
+   // implementation(libs.gplay.location)
 
    // TESTS -----------------------
    testImplementation(libs.junit)
