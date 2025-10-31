@@ -1,0 +1,7 @@
+<!-- file: app/src/androidTest/AndroidManifest.xml -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="de.rogallab.mobile">
+
+  <application
+    android:name="de.rogallab.mobile.test.TestApplication" />
+</manifest>

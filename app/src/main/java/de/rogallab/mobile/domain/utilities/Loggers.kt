@@ -27,7 +27,7 @@ fun logVerbose(tag: String, message: String) {
 
 fun logComp(tag: String, message: String) {
    val msg = formatMessage(message)
-   if (Globals.isComposition) Log.v(tag, msg)
+   if (Globals.isComp) Log.v(tag, msg)
 }
 
 private fun formatMessage(message: String) =

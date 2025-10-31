@@ -11,5 +11,5 @@ object Globals {
    var isDebug = true
    var isInfo = true
    var isVerbose = false
-   val isComposition = false
+   var isComp = true
 }

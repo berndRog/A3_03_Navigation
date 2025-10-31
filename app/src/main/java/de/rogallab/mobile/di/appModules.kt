@@ -11,6 +11,7 @@ import de.rogallab.mobile.domain.IPersonRepository
 import de.rogallab.mobile.domain.utilities.logInfo
 import de.rogallab.mobile.ui.navigation.INavHandler
 import de.rogallab.mobile.ui.navigation.Nav3ViewModel
+import de.rogallab.mobile.ui.navigation.PeopleList
 import de.rogallab.mobile.ui.people.PersonValidator
 import de.rogallab.mobile.ui.people.PersonViewModel
 import org.koin.android.ext.koin.androidContext
