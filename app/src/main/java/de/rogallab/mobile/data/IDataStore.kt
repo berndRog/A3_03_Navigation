@@ -1,11 +1,12 @@
 package de.rogallab.mobile.data
 
 import de.rogallab.mobile.domain.entities.Person
+import java.nio.file.Path
 
 interface IDataStore {
+   val filePath: Path
 
    fun initialize()
-
    fun selectAll(): List<Person>
    fun selectAllSortedBy(selector: (Person) -> String?): List<Person>
    fun selectWhere(predicate: (Person) -> Boolean): List<Person>

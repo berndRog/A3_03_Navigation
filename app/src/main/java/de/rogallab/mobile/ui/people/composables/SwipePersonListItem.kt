@@ -1,4 +1,4 @@
-package de.rogallab.mobile.ui.people.composables.list
+package de.rogallab.mobile.ui.people.composables
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween

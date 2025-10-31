@@ -1,4 +1,4 @@
-package de.rogallab.mobile.ui.people.composables.input_detail
+package de.rogallab.mobile.ui.people.composables
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
@@ -38,7 +38,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.rogallab.mobile.R
 import de.rogallab.mobile.domain.utilities.logComp
 import de.rogallab.mobile.domain.utilities.logDebug
-import de.rogallab.mobile.domain.utilities.logVerbose
 import de.rogallab.mobile.ui.errors.ErrorHandler
 import de.rogallab.mobile.ui.people.PersonIntent
 import de.rogallab.mobile.ui.people.PersonValidator
@@ -52,23 +51,16 @@ fun PersonInputScreen(
    onNavigateReverse: () -> Unit = {},
 ) {
    val tag = "<-PersonInputScreen"
-   val nComp = remember { mutableIntStateOf(1) }
-   SideEffect { logComp(tag, "Composition #${nComp.value++}") }
+   val nComp = remember{ mutableIntStateOf(1) }
+   SideEffect { logComp(tag, "Composition #${nComp.intValue++}") }
 
    // observe the personUiStateFlow in the ViewModel
-   val lifecycle = (LocalActivity.current as? ComponentActivity)?.lifecycle
-      ?: LocalLifecycleOwner.current.lifecycle
    val personUiState by viewModel.personUiStateFlow.collectAsStateWithLifecycle(
-      lifecycle = lifecycle,
-      minActiveState = Lifecycle.State.STARTED
+      minActiveState = Lifecycle.State.RESUMED,
    )
-   LaunchedEffect(personUiState.person) {
-      logDebug(tag, "PersonUiState: ${personUiState.person}")
-   }
-
+   SideEffect { logDebug(tag, "PersonUiState: ${personUiState.person}") }
 
    val snackbarHostState = remember { SnackbarHostState() }
-
    Scaffold(
       contentColor = MaterialTheme.colorScheme.onBackground,
       contentWindowInsets = WindowInsets.safeDrawing, // .safeContent .safeGestures,
@@ -108,7 +100,6 @@ fun PersonInputScreen(
             .verticalScroll(rememberScrollState())
             .imePadding()
       ) {
-
          PersonContent(
             personUiState = personUiState,
             validator = koinInject<PersonValidator>(),

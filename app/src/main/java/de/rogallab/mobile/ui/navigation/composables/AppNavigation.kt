@@ -24,9 +24,9 @@ import de.rogallab.mobile.ui.navigation.PeopleList
 import de.rogallab.mobile.ui.navigation.PersonDetail
 import de.rogallab.mobile.ui.navigation.PersonInput
 import de.rogallab.mobile.ui.people.PersonViewModel
-import de.rogallab.mobile.ui.people.composables.input_detail.PersonDetailScreen
-import de.rogallab.mobile.ui.people.composables.input_detail.PersonInputScreen
-import de.rogallab.mobile.ui.people.composables.list.PeopleListScreen
+import de.rogallab.mobile.ui.people.composables.PersonDetailScreen
+import de.rogallab.mobile.ui.people.composables.PersonInputScreen
+import de.rogallab.mobile.ui.people.composables.PeopleListScreen
 
 @Composable
 fun AppNavigation(

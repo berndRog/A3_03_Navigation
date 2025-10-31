@@ -18,8 +18,7 @@ import de.rogallab.mobile.domain.utilities.logDebug
 
 @Composable
 fun SelectAndShowImage(
-   imageUrl: String?,                                // State ↓
-   onImageUrlChange: (String?) -> Unit,              // Event ↑
+   imageUrl: String?                                 // State ↓
 ) {
 
    Row(

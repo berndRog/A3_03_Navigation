@@ -2,6 +2,7 @@ package de.rogallab.mobile.di
 
 import androidx.navigation3.runtime.NavKey
 import de.rogallab.mobile.data.IDataStore
+import de.rogallab.mobile.data.local.Seed
 import de.rogallab.mobile.data.local.appstorage.AppStorage
 import de.rogallab.mobile.data.local.datastore.DataStore
 import de.rogallab.mobile.data.repositories.PersonRepository
@@ -22,20 +23,28 @@ val defModules: Module = module {
     val tag = "<-defModules"
 
     // data modules
-    logInfo(tag, "single    -> AppStorage:IAppStorage")
-    single<IAppStorage> {
-        AppStorage(_context = androidContext())
-    }
+   logInfo(tag, "single    -> Seed")
+   single<Seed> {
+      Seed(
+         _context = androidContext(),
+         _isTest = false
+      )
+   }
 
-    logInfo(tag, "single    -> DataStore")
-    single<IDataStore> {
-        DataStore(
-           _context = androidContext(),
-           _appStorage = get<IAppStorage>(),
-           directoryName = null,
-           fileName = null,
-        )
-    }
+   logInfo(tag, "single    -> DataStore: IDataStore")
+   single<IAppStorage> {
+      AppStorage( _context = androidContext() )
+   }
+
+   logInfo(tag, "single    -> DataStore: IDataStore")
+   single<IDataStore> {
+      DataStore(
+         directoryName = null,
+         fileName = null,
+         _context = androidContext(),
+         _seed = get<Seed>()
+      )
+   }
 
     logInfo(tag, "single    -> PersonRepository: IPersonRepository")
     single<IPersonRepository> {

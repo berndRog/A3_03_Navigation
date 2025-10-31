@@ -1,7 +1,6 @@
-package de.rogallab.mobile.ui.people.composables.list
+package de.rogallab.mobile.ui.people.composables
 
 import android.app.Activity
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -37,12 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.rogallab.mobile.R
 import de.rogallab.mobile.domain.utilities.logComp
 import de.rogallab.mobile.domain.utilities.logDebug
-import de.rogallab.mobile.domain.utilities.logVerbose
 import de.rogallab.mobile.ui.errors.ErrorHandler
 import de.rogallab.mobile.ui.errors.ErrorState
 import de.rogallab.mobile.ui.people.PeopleIntent
@@ -61,14 +58,11 @@ fun PeopleListScreen(
    SideEffect { logComp(tag, "Composition #${nComp.value++}") }
 
    // observe the peopleUiStateFlow in the ViewModel
-   val lifecycle = (LocalActivity.current as? ComponentActivity)?.lifecycle
-      ?: LocalLifecycleOwner.current.lifecycle
    val peopleUiState by viewModel.peopleUiStateFlow.collectAsStateWithLifecycle(
-      lifecycle = lifecycle,
-      minActiveState = Lifecycle.State.STARTED
+      minActiveState = Lifecycle.State.RESUMED
    )
-   LaunchedEffect(peopleUiState.isLoading, peopleUiState.people.size) {
-      logDebug(tag, "PeopleUiState: isLoading=${peopleUiState.isLoading} size=${peopleUiState.people.size}")
+   SideEffect {
+      logDebug(tag, "PeopleUiState: $peopleUiState.isLoading} size=${peopleUiState.people.size}")
    }
 
    LaunchedEffect(Unit) {
