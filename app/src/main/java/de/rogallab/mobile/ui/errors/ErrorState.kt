@@ -3,6 +3,7 @@ package de.rogallab.mobile.ui.errors
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
+import de.rogallab.mobile.Globals
 
 @Immutable
 data class ErrorState(
@@ -26,7 +27,7 @@ data class ErrorState(
    val onDismissed: () -> Unit = { }, // no-op (do nothing)
 
    // duration:          Defines how long the Snackbar remains visible.
-   val duration: SnackbarDuration = SnackbarDuration.Long,
+   val duration: SnackbarDuration = Globals.snackbarDuration,
    // delayed navigation: Optional navigation key used for deferred navigation
    //                     onDelayedNavigation() will be called after the Snackbar is
    //                     dismissed.

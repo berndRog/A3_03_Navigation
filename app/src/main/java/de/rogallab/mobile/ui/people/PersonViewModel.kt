@@ -32,6 +32,7 @@ class PersonViewModel(
    fun handlePeopleIntent(intent: PeopleIntent) {
       when (intent) {
          is PeopleIntent.Fetch -> fetch()
+         is PeopleIntent.Clean -> cleanUp()
       }
    }
 
@@ -258,6 +259,12 @@ class PersonViewModel(
             }
          }
          .onFailure { t -> handleErrorEvent(t) }
+   }
+   private fun cleanUp() {
+      logDebug(TAG, "cleanUp()")
+      updateState(_peopleUiStateFlow) {
+         copy(isLoading = false, people = emptyList())
+      }
    }
    // endregion
 

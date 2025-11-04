@@ -38,37 +38,38 @@ fun PersonContent(
          value = personUiState.person.firstName,
          onValueChange = onFirstNameChange,
          label = stringResource(R.string.firstName),
+         validate = validator::validateFirstName,
          leadingIcon = Icons.Outlined.Person,
          keyboardType = KeyboardType.Text,
          imeAction = ImeAction.Next,
-         validate = validator::validateFirstName,
       )
       InputValueString(
          value = personUiState.person.lastName,
          onValueChange = onLastNameChange,
          label = stringResource(R.string.lastName),
+         validate = validator::validateLastName,
          leadingIcon = Icons.Outlined.Person,
          keyboardType = KeyboardType.Text,
          imeAction = ImeAction.Next,
-         validate = validator::validateLastName,
       )
       InputValueString(
          value = personUiState.person.email ?: "",
          onValueChange = onEmailChange,
          label = stringResource(R.string.email),
+         validate = validator::validateEmail,
+         ascii = true,
          leadingIcon = Icons.Outlined.Email,
          keyboardType = KeyboardType.Email,
          imeAction = ImeAction.Next,
-         validate = validator::validateEmail
       )
       InputValueString(
          value = personUiState.person.phone ?: "",
          onValueChange = onPhoneChange,
          label = stringResource(R.string.phone),
+         validate = validator::validatePhone,
          leadingIcon = Icons.Outlined.Phone,
          keyboardType = KeyboardType.Phone,
          imeAction = ImeAction.Done,
-         validate = validator::validatePhone
       )
       SelectAndShowImage(
          imageUrl = personUiState.person.imagePath,

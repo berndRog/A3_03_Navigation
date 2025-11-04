@@ -10,22 +10,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.rogallab.mobile.R
 import de.rogallab.mobile.domain.utilities.logComp
-import de.rogallab.mobile.domain.utilities.logDebug
+import de.rogallab.mobile.ui.base.composables.CollectBy
 import de.rogallab.mobile.ui.errors.ErrorHandler
 import de.rogallab.mobile.ui.people.PersonIntent
 import de.rogallab.mobile.ui.people.PersonValidator
 import de.rogallab.mobile.ui.people.PersonViewModel
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinActivityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PersonDetailScreen(
    id: String,
-   viewModel: PersonViewModel,
+   viewModel: PersonViewModel = koinActivityViewModel<PersonViewModel>(),
    onNavigateReverse: () -> Unit = {},
 ) {
    val tag = "<-PersonDetailScreen"
@@ -33,10 +32,7 @@ fun PersonDetailScreen(
    SideEffect { logComp(tag, "Composition #${nComp.intValue++}") }
 
    // observe the personUiStateFlow in the ViewModel
-   val personUiState by viewModel.personUiStateFlow.collectAsStateWithLifecycle(
-      minActiveState = Lifecycle.State.RESUMED,
-   )
-   SideEffect { logDebug(tag, "PersonUiState: ${personUiState.person}") }
+   val personUiState = CollectBy(viewModel.personUiStateFlow, tag)
 
    // fetch person by id
    LaunchedEffect(id) {

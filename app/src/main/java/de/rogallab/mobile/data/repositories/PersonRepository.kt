@@ -11,13 +11,17 @@ class PersonRepository(
       tryCatching{ _dataStore.selectAll() }
 
    override fun getAllSortedBy(selector: (Person) -> String?): Result<List<Person>> =
-      tryCatching { _dataStore.selectAllSortedBy(selector) }
+      tryCatching {
+         throw Exception("to test exceptions")
+         _dataStore.selectAllSortedBy(selector) }
 
    override fun getWhere(predicate: (Person) -> Boolean): Result<List<Person>> =
       tryCatching { _dataStore.selectWhere(predicate) }
 
    override fun findById(id: String): Result<Person?> =
-      tryCatching { _dataStore.findById(id)  }
+      tryCatching {
+         // throw Exception("to test exceptions")
+         _dataStore.findById(id)  }
 
    override fun findBy(predicate: (Person) -> Boolean): Result<Person?> =
       tryCatching { _dataStore.findBy(predicate)  }

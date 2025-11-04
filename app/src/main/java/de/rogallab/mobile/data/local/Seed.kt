@@ -6,6 +6,7 @@ import de.rogallab.mobile.R
 import de.rogallab.mobile.domain.IAppStorage
 import de.rogallab.mobile.domain.entities.Person
 import de.rogallab.mobile.domain.utilities.logDebug
+import de.rogallab.mobile.domain.utilities.sanitizeDigit
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.io.File
@@ -45,9 +46,10 @@ class Seed(
          val firstName = firstNames[index]
          val lastName = lastNames[index]
          val email =
-            "${firstName.lowercase()}." +
-               "${lastName.lowercase()}@" +
+            "${sanitizeDigit(firstName.lowercase(locale = Locale.ROOT))}." +
+               "${sanitizeDigit(lastName.lowercase(locale = Locale.ROOT))}@" +
                "${emailProvider.random()}"
+
          val phone: String =
             "0${random.nextInt(1234, 9999)} " +
                "${random.nextInt(100, 999)}-" +

@@ -40,16 +40,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.rogallab.mobile.R
 import de.rogallab.mobile.domain.utilities.logComp
 import de.rogallab.mobile.domain.utilities.logDebug
+import de.rogallab.mobile.ui.base.composables.CollectBy
 import de.rogallab.mobile.ui.errors.ErrorHandler
 import de.rogallab.mobile.ui.errors.ErrorState
 import de.rogallab.mobile.ui.people.PeopleIntent
 import de.rogallab.mobile.ui.people.PersonIntent
 import de.rogallab.mobile.ui.people.PersonViewModel
+import org.koin.compose.viewmodel.koinActivityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PeopleListScreen(
-   viewModel: PersonViewModel,
+   viewModel: PersonViewModel = koinActivityViewModel<PersonViewModel>(),
    onNavigatePersonInput: () -> Unit = {},
    onNavigatePersonDetail: (String) -> Unit = {}
 ) {
@@ -58,12 +60,7 @@ fun PeopleListScreen(
    SideEffect { logComp(tag, "Composition #${nComp.value++}") }
 
    // observe the peopleUiStateFlow in the ViewModel
-   val peopleUiState by viewModel.peopleUiStateFlow.collectAsStateWithLifecycle(
-      minActiveState = Lifecycle.State.RESUMED
-   )
-   SideEffect {
-      logDebug(tag, "PeopleUiState: $peopleUiState.isLoading} size=${peopleUiState.people.size}")
-   }
+   val peopleUiState = CollectBy(viewModel.peopleUiStateFlow, tag)
 
    LaunchedEffect(Unit) {
       logDebug(tag, "Fetching people")
@@ -88,7 +85,6 @@ fun PeopleListScreen(
          viewModel.handlePersonIntent(PersonIntent.Restored)
       }
    }
-
 
    Scaffold(
       contentColor = MaterialTheme.colorScheme.onBackground,
@@ -144,11 +140,11 @@ fun PeopleListScreen(
             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
          }
       } else {
-         SideEffect { logDebug(tag, "Show Lazy Column") }
+         val people = peopleUiState.people
+         SideEffect { logDebug(tag, "Show Lazy Column size:${people.size}") }
 
          val undoMessage = stringResource(R.string.undoDeletePerson)
          val undoActionLabel = stringResource(R.string.undoAnswer)
-         val people = peopleUiState.people
 
          LazyColumn(
             state = listState,
@@ -161,7 +157,8 @@ fun PeopleListScreen(
                items = people,
                key = { person -> person.id }
             ) { person ->
-               //SideEffect{ logDebug(tag, "Lazy Column, size:${people.size} - Person: ${person.firstName}") }
+               SideEffect{
+                  logDebug(tag, "Lazy Column visible items:${person.firstName} ${person.lastName}")}
 
                SwipePersonListItem(
                   person = person,
@@ -196,6 +193,7 @@ fun PeopleListScreen(
 
    ErrorHandler(
       viewModel = viewModel,
-      snackbarHostState = snackbarHostState
+      snackbarHostState = snackbarHostState,
+      onCleanUp = { viewModel.handlePeopleIntent(PeopleIntent.Clean)}
    )
 }
