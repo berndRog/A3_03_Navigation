@@ -29,8 +29,9 @@ import java.nio.file.Path
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+// problems with java version 17 and android sdk 36
 @RunWith(org.robolectric.RobolectricTestRunner::class)
-@Config(sdk = [35], application = TestApplication::class)
+@Config(sdk = [34], application = TestApplication::class)
 class PersonViewModelIntegrationTest : KoinTest {
 
    @get:Rule

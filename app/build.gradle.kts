@@ -57,6 +57,10 @@ dependencies {
    // https://kotlinlang.org/docs/releases.html
    implementation (libs.kotlinx.coroutines.core)
    implementation (libs.kotlinx.coroutines.android)
+   // Kotlin Datetime
+   implementation(libs.kotlinx.datetime)
+   // Kotlin Serialization
+   implementation(libs.kotlinx.serialization.json)
 
    // Ui Activity
    // https://developer.android.com/jetpack/androidx/releases/activity
@@ -112,9 +116,6 @@ dependencies {
    implementation(libs.koin.core)
    implementation(libs.koin.android)
    implementation(libs.koin.androidx.compose)
-
-   // Ktor/Kotlin JSON Serializer
-   implementation(libs.kotlinx.serialization.json)
 
    // Retrofit
    implementation(libs.gson.json)

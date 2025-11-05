@@ -31,8 +31,10 @@ import kotlin.test.fail
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
+// problems with java version 17 and android sdk 36
+
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35], application = TestApplication::class) // keine MainApplication!
+@Config(sdk = [34], application = TestApplication::class) // keine MainApplication!
 class IPersonRepositoryUt : KoinTest {
 
    @get:Rule
