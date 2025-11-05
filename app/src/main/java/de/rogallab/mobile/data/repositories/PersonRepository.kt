@@ -12,7 +12,7 @@ class PersonRepository(
 
    override fun getAllSortedBy(selector: (Person) -> String?): Result<List<Person>> =
       tryCatching {
-         throw Exception("to test exceptions")
+         //throw Exception("to test exceptions")
          _dataStore.selectAllSortedBy(selector) }
 
    override fun getWhere(predicate: (Person) -> Boolean): Result<List<Person>> =

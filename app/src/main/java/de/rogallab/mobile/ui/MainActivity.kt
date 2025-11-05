@@ -19,18 +19,18 @@ class MainActivity : BaseActivity(TAG) {
 
    // lazy initialization of the ViewModel with koin
    // Activity-scoped ViewModels viewModelStoreOwner = MainActivity
-   private val _navViewModel: Nav3ViewModel by viewModel {
-      parametersOf(PeopleList) }
-
-   private val _personViewModel: PersonViewModel by viewModel{
-      parametersOf(_navViewModel as INavHandler) }
+//   private val _navViewModel: Nav3ViewModel by viewModel {
+//      parametersOf(PeopleList) }
+//
+//   private val _personViewModel: PersonViewModel by viewModel{
+//      parametersOf(_navViewModel as INavHandler) }
 
 
    override fun onCreate(savedInstanceState: Bundle?) {
       super.onCreate(savedInstanceState)
 
-      logDebug(TAG, "_navViewModel=${System.identityHashCode(_navViewModel)}")
-      logDebug(TAG, "_peopleViewModel=${System.identityHashCode(_personViewModel)}")
+//    logDebug(TAG, "_navViewModel=${System.identityHashCode(_navViewModel)}")
+//    logDebug(TAG, "_peopleViewModel=${System.identityHashCode(_personViewModel)}")
 
       enableEdgeToEdge()
 
@@ -38,8 +38,7 @@ class MainActivity : BaseActivity(TAG) {
          AppTheme {
             AppNavigation(
                // startDestination = PeopleList
-               personViewModel = _personViewModel,
-               navViewModel = _navViewModel
+               //navViewModel = _navViewModel
             )
          }
       }

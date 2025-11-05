@@ -21,6 +21,11 @@ class PersonViewModel(
 
    init { logDebug(TAG, "init instance=${System.identityHashCode(this)}") }
 
+   override fun onCleared() {
+      logDebug(TAG, "onCleared instance=${System.identityHashCode(this)}")
+      super.onCleared()
+   }
+
    // region StateFlows and Intent handlers --------------------------------------------------------
    // StateFlow for PeopleListScreen ---------------------------------------------------------------
    private val _peopleUiStateFlow: MutableStateFlow<PeopleUiState> =

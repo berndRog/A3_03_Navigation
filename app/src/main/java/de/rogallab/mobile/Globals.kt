@@ -3,10 +3,10 @@ package de.rogallab.mobile
 import androidx.compose.material3.SnackbarDuration
 
 object Globals {
-   const val directory_name = "android"
-   const val file_name = "people33.json"
+   val directory_name = "android"
+   val file_name = "people33.json"
 
-   const val ANIMATION_DURATION = 500
+   val animation_duration = 1000
    val snackbarDuration = SnackbarDuration.Long  // 10000 ms
 
    var isDebug = true

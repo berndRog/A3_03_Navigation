@@ -35,7 +35,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import de.rogallab.mobile.Globals.ANIMATION_DURATION
+import de.rogallab.mobile.Globals
 import de.rogallab.mobile.domain.entities.Person
 import de.rogallab.mobile.domain.utilities.logComp
 import de.rogallab.mobile.domain.utilities.logDebug
@@ -125,7 +125,7 @@ fun SwipePersonListItem(
    // After the exit animation finishes, perform the actual remove and prompt Undo
    LaunchedEffect(isRemoved, person.id) {
       if (isRemoved) {
-         delay(ANIMATION_DURATION.toLong())
+         delay(Globals.animation_duration.toLong())
          onRemove()
          onUndo()
       }
@@ -134,7 +134,7 @@ fun SwipePersonListItem(
    AnimatedVisibility(
       visible = !isRemoved,
       exit = shrinkVertically(
-         animationSpec = tween(durationMillis = ANIMATION_DURATION),
+         animationSpec = tween(durationMillis = Globals.animation_duration),
          shrinkTowards = Alignment.Top
       ) + fadeOut()
    ) {

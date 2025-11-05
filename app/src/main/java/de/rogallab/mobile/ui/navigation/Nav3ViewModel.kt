@@ -4,6 +4,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.navigation3.runtime.NavKey
 import de.rogallab.mobile.domain.utilities.logDebug
+import de.rogallab.mobile.ui.people.PersonViewModel
 import kotlin.compareTo
 import kotlin.text.clear
 
@@ -19,7 +20,14 @@ class Nav3ViewModel(
    val startDestination: NavKey = PeopleList
 ) : ViewModel(), INavHandler {
 
-   init { logDebug(TAG, "init instance=${System.identityHashCode(this)}") }
+   init {
+      logDebug(TAG, "init instance=${System.identityHashCode(this)}")
+   }
+   override fun onCleared() {
+      logDebug(TAG, "onCleared instance=${System.identityHashCode(this)}")
+      super.onCleared()
+   }
+
 
    // Internal mutable backstack, initialized with the startDestination
    private val _navBackStack: SnapshotStateList<NavKey> =
