@@ -8,19 +8,18 @@ sealed class PersonIntent {
    data class  LastNameChange(val lastName: String) : PersonIntent()
    data class  EmailChange(val email: String) : PersonIntent()
    data class  PhoneChange(val phone: String) : PersonIntent()
-   data class  ImageChange(val uriString: String) : PersonIntent()
-
+   data class  ImagePathChange(val uriString: String?) : PersonIntent()
 
    data object Clear : PersonIntent()
    data class  FetchById(val id: String) : PersonIntent()
    data object Create : PersonIntent()
    data object Update : PersonIntent()
    data class  Remove(val person: Person) : PersonIntent()
+   data class  RemoveUndo(val person: Person) : PersonIntent()
    data object Undo : PersonIntent()
    data object Restored : PersonIntent()
 
-
-   data class ErrorEvent(val message: String) : PersonIntent()
+   data class ErrorEvent(val message: String): PersonIntent()
    data class UndoEvent(val errorState: ErrorState) : PersonIntent()
 
 }

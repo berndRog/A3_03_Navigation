@@ -17,7 +17,7 @@ class Seed(
    private val _context: Context,
    private val _isTest: Boolean = false
 ): KoinComponent {
-   private val _fileName = Globals.file_name
+   private val _fileName = Globals.fileName
    private val _imageDirectoryName = File(_fileName).nameWithoutExtension
 
    private val _appStorage: IAppStorage by inject()

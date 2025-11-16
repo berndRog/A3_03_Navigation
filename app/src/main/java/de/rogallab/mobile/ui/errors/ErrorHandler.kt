@@ -25,14 +25,15 @@ fun ErrorHandler(
    val lifecycle = lifecycleOwner.lifecycle
 
    LaunchedEffect(viewModel, lifecycleOwner, lifecycle, snackbarHostState) {
-      logVerbose(tag, "lifecycleOwner:${lifecycleOwner.toString()} lifecycle.State:${lifecycle.currentState.toString()}")
+      logVerbose(tag, "lifecycleOwner:${lifecycleOwner.toString()}")
+      logVerbose(tag, "lifecycle.State:${lifecycle.currentState}")
 
       lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
          // collectLatest automatically cancels the currently running Snackbar
          // when a new event is emitted.
          viewModel.errorFlow.collectLatest { errorState ->
             if (errorState == null) return@collectLatest
-            logVerbose(tag, "${errorState.toString()}")
+            logVerbose(tag, "$errorState")
             try {
                showError(snackbarHostState, errorState)
             } finally {

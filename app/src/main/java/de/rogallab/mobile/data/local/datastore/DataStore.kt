@@ -24,8 +24,8 @@ class DataStore(
 
    // directory and file name for the dataStore from MainApplication
    private val _appHome:String = _context.filesDir.toString()
-   private var _directoryName = directoryName ?: Globals.directory_name
-   private val _fileName = fileName ?: Globals.file_name
+   private var _directoryName = directoryName ?: Globals.directoryName
+   private val _fileName = fileName ?: Globals.fileName
 
    override val filePath: Path = getOrCreateFilePath(
       appHome = _appHome,

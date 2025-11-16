@@ -160,11 +160,11 @@ fun PeopleListScreen(
                SideEffect{
                   logDebug(tag, "Lazy Column visible items:${person.firstName} ${person.lastName}")}
 
-               SwipePersonListItem(
+               SwipePersonListItemWithUndo(
                   person = person,
                   onNavigate = { onNavigatePersonDetail(person.id) },
                   onRemove = {
-                     viewModel.handlePersonIntent(PersonIntent.Remove(person))
+                     viewModel.handlePersonIntent(PersonIntent.RemoveUndo(person))
                   },
                   onUndo = {
                      val errorState = ErrorState(

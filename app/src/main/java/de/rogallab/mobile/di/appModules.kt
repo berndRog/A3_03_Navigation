@@ -67,7 +67,7 @@ val defModules: Module = module {
     viewModel { (navHandler: INavHandler) ->
         PersonViewModel(
            _repository = get<IPersonRepository>(),
-           navHandler = navHandler,
+           _navHandler = navHandler,
            _validator = get<PersonValidator>()
         )
     }

@@ -34,10 +34,11 @@ fun <T> CollectBy (uiStateFlow: StateFlow<T>, tag:String ): T {
    val viewModelStoreOwner = LocalViewModelStoreOwner.current
    val viewModelStore = viewModelStoreOwner?.viewModelStore
    SideEffect {
-      logDebug(tag, "lifecycleOwner:${lifecycleOwner.toString()} lifecycle.State:${lifecycle.currentState.toString()}")
-      logDebug(tag, "${uiState.toString()}")
-      logDebug(tag, "viewModelStoreOwner: ${viewModelStoreOwner.toString()}")
-      logDebug(tag, "viewModelStore: ${viewModelStore?.keys().toString()}")
+      logVerbose(tag, "lifecycleOwner:${lifecycleOwner.toString()}")
+      logVerbose(tag, "lifecycle.State:${lifecycle.currentState}")
+      logVerbose(tag, "${uiState.toString()}")
+      logVerbose(tag, "viewModelStoreOwner: ${viewModelStoreOwner}")
+      logVerbose(tag, "viewModelStore present: ${viewModelStore != null}")
    }
    return uiState
 }

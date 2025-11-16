@@ -77,7 +77,7 @@ val defModulesAndroidTest: Module = module {
    factory { (navHandler: INavHandler) ->
       PersonViewModel(
          _repository = get<IPersonRepository>(),
-         navHandler = navHandler,
+         _navHandler = navHandler,
          _validator = get<PersonValidator>()
       )
    }

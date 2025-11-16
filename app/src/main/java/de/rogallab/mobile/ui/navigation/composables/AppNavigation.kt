@@ -46,7 +46,7 @@ fun AppNavigation(
    personViewModel: PersonViewModel = koinActivityViewModel<PersonViewModel> {
       parametersOf( navViewModel )
    },
-   animationDuration: Int = Globals.animation_duration
+   animationDuration: Int = Globals.animationDuration
 ) {
    val tag = "<-AppNavigation"
    val nComp = remember { mutableIntStateOf(1) }

@@ -1,43 +1,28 @@
 package de.rogallab.mobile.ui.people.composables
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxDefaults
-import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import de.rogallab.mobile.Globals
 import de.rogallab.mobile.domain.entities.Person
-import de.rogallab.mobile.domain.utilities.logComp
 import de.rogallab.mobile.domain.utilities.logDebug
 import kotlinx.coroutines.delay
 /**
@@ -79,7 +64,7 @@ import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SwipePersonListItem(
+fun SwipePersonListItemWithUndo(
    person: Person,
    onNavigate: (String) -> Unit,
    onRemove: () -> Unit,
@@ -87,8 +72,6 @@ fun SwipePersonListItem(
    content: @Composable () -> Unit
 ) {
    val tag = "<-SwipePersonListItem"
-   val nComp = remember { mutableIntStateOf(1) }
-   SideEffect { logComp(tag, "Composition #${nComp.value++}") }
 
    var isRemoved by remember(person.id) { mutableStateOf(false) }
 
@@ -125,7 +108,7 @@ fun SwipePersonListItem(
    // After the exit animation finishes, perform the actual remove and prompt Undo
    LaunchedEffect(isRemoved, person.id) {
       if (isRemoved) {
-         delay(Globals.animation_duration.toLong())
+         delay(Globals.animationDuration.toLong())
          onRemove()
          onUndo()
       }
@@ -134,13 +117,19 @@ fun SwipePersonListItem(
    AnimatedVisibility(
       visible = !isRemoved,
       exit = shrinkVertically(
-         animationSpec = tween(durationMillis = Globals.animation_duration),
+         animationSpec = tween(durationMillis = Globals.animationDuration),
          shrinkTowards = Alignment.Top
-      ) + fadeOut()
+      ) + fadeOut(
+         animationSpec = spring(
+            dampingRatio = Spring.DampingRatioHighBouncy,
+            stiffness = Spring.StiffnessHigh,
+            visibilityThreshold = 0.002f
+         )
+      )
    ) {
       SwipeToDismissBox(
          state = state,
-         backgroundContent = { SetSwipeBackground(state) },
+         backgroundContent = { SwipeSetBackground(state) },
          enableDismissFromStartToEnd = true,
          enableDismissFromEndToStart = true,
          modifier = Modifier.padding(vertical = 4.dp)
@@ -149,74 +138,3 @@ fun SwipePersonListItem(
       }
    }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SetSwipeBackground(state: SwipeToDismissBoxState) {
-   val (colorBox, colorIcon, alignment, icon, description, scale) =
-      GetSwipeProperties(state)
-
-   Box(
-      Modifier
-         .fillMaxSize()
-         .background(
-            color = colorBox,
-            shape = RoundedCornerShape(10.dp)
-         )
-         .padding(horizontal = 16.dp),
-      contentAlignment = alignment
-   ) {
-      Icon(
-         imageVector = icon,
-         contentDescription = description,
-         modifier = Modifier.scale(scale),
-         tint = colorIcon
-      )
-   }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GetSwipeProperties(
-   state: SwipeToDismissBoxState
-): SwipeProperties {
-   val direction = state.dismissDirection
-
-   val colorBox: Color = when (direction) {
-      SwipeToDismissBoxValue.StartToEnd -> Color(0xFF008000) // Green
-      SwipeToDismissBoxValue.EndToStart -> Color(0xFFB22222) // Firebrick Red
-      else -> MaterialTheme.colorScheme.surface
-   }
-   val colorIcon: Color = Color.White
-
-   val alignment: Alignment = when (direction) {
-      SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-      SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-      else -> Alignment.Center
-   }
-
-   val icon: ImageVector = when (direction) {
-      SwipeToDismissBoxValue.StartToEnd -> Icons.Outlined.Edit
-      SwipeToDismissBoxValue.EndToStart -> Icons.Outlined.Delete
-      else -> Icons.Outlined.Info
-   }
-
-   val description: String = when (direction) {
-      SwipeToDismissBoxValue.StartToEnd -> "Edit"
-      SwipeToDismissBoxValue.EndToStart -> "Delete"
-      else -> "Unknown Action"
-   }
-
-   val scale = if (state.targetValue == SwipeToDismissBoxValue.Settled) 1.2f else 1.8f
-
-   return SwipeProperties(colorBox, colorIcon, alignment, icon, description, scale)
-}
-
-data class SwipeProperties(
-   val colorBox: Color,
-   val colorIcon: Color,
-   val alignment: Alignment,
-   val icon: ImageVector,
-   val description: String,
-   val scale: Float
-)

@@ -15,9 +15,9 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class PersonViewModel(
    private val _repository: IPersonRepository,
-   navHandler: INavHandler,
+   private val _navHandler: INavHandler,
    private val _validator: PersonValidator
-): BaseViewModel(navHandler, TAG) {
+): BaseViewModel(_navHandler, TAG) {
 
    init { logDebug(TAG, "init instance=${System.identityHashCode(this)}") }
 
@@ -54,13 +54,15 @@ class PersonViewModel(
          is PersonIntent.LastNameChange -> onLastNameChange(intent.lastName)
          is PersonIntent.EmailChange -> onEmailChange(intent.email)
          is PersonIntent.PhoneChange -> onPhoneChange(intent.phone)
-         is PersonIntent.ImageChange -> onImageChange(intent.uriString)
+         is PersonIntent.ImagePathChange -> onImageChange(intent.uriString)
 
          is PersonIntent.Clear -> clearState()
          is PersonIntent.FetchById -> fetchById(intent.id)
          is PersonIntent.Create -> create()
          is PersonIntent.Update -> update()
          is PersonIntent.Remove -> remove(intent.person)
+
+         is PersonIntent.RemoveUndo -> removeUndo(intent.person)
          is PersonIntent.Undo -> undoRemove()
          is PersonIntent.Restored -> restored()
 
@@ -129,10 +131,15 @@ class PersonViewModel(
          .onSuccess { fetch() } // reread all people
          .onFailure { t -> handleErrorEvent(t) }
    }
-
    private fun update() {
       logDebug(TAG, "updatePerson()")
       _repository.update(_personUiStateFlow.value.person)
+         .onSuccess { fetch() } // reread all people
+         .onFailure { t -> handleErrorEvent(t) }
+   }
+   private fun remove(person: Person) {
+      logDebug(TAG, "removePerson()")
+      _repository.remove(_personUiStateFlow.value.person)
          .onSuccess { fetch() } // reread all people
          .onFailure { t -> handleErrorEvent(t) }
    }
@@ -142,71 +149,40 @@ class PersonViewModel(
    private var _removedPerson: Person? = null
    private var _removedPersonIndex: Int = -1 // Store only the index
 
-   /**
-    * REMOVE (Optimistic-then-Persist)
-    * Step-by-step:
-    * 1) Find the index by ID (more robust than instance equality)
-    * 2) Store (person, index) in the undo buffer
-    * 3) Update UI state immediately (remove from list)
-    * 4) Persist the deletion in background (repository call)
-    */
-   private fun remove(person: Person) {
+   private fun removeUndo(person: Person) {
       logDebug(TAG, "removePerson()")
-
-      // Find index of person to remove
-      val currentList = _peopleUiStateFlow.value.people
-      val index = currentList.indexOfFirst { it.id == person.id }  // <— statt indexOf(person)
-      if (index == -1) return
-      _removedPerson = person
-      _removedPersonIndex = index
-
-      // Remove person in StateFlow and
-      // immediately update UI - without data handling
-      val updatedList = currentList.toMutableList().also { it.removeAt(index) }
-      updateState(_peopleUiStateFlow) { copy(people = updatedList) }
-
-      // Remove person from repository in background
-      _repository.remove(person)
-         .onFailure { t -> handleErrorEvent(t) }
+      removeItem(
+         item = person,
+         currentList = _peopleUiStateFlow.value.people,
+         getId = { it.id },
+         onRemovedItem = { _removedPerson = it as? Person },
+         onRemovedItemIndex = { _removedPersonIndex = it },
+         updateUi = { updatedList ->
+            updateState(_peopleUiStateFlow) { copy(people = updatedList) }
+         },
+         persistRemove = { _repository.remove(it) },
+         tag = TAG
+      )
    }
 
-   /**
-    * UNDO (Optimistic-then-Persist)
-    * 1) Read undo buffer; abort if empty
-    * 2) Reinsert into current UI at the old index (coerceAtMost avoids OOB if list length changed)
-    * 3) Set restoredPersonId so the UI can scroll to it
-    * 4) Persist create back in the repository
-    * 5) Clear the undo buffer
-    */
    private fun undoRemove() {
-      // Restore the last removed person if any
-      val personToRestore = _removedPerson ?: return
-      val indexToRestore = _removedPersonIndex
-      if (indexToRestore == -1) return
-      logDebug(TAG, "undoRemovePerson: ${personToRestore.id}")
-
-      // Restore person in StateFlow and
-      // immediately update UI - without data handling
-      val currentList = _peopleUiStateFlow.value.people.toMutableList()
-      if (currentList.any { it.id == personToRestore.id }) return // already in the list
-      // Reinsert at old index (or at end if list got shorter)
-      currentList.add(indexToRestore.coerceAtMost(currentList.size), personToRestore)
-      updateState(_peopleUiStateFlow) {
-         copy(people = currentList, restoredPersonId = personToRestore.id)
-      }
-
-      // Add person back to repository in background
-      _repository.create(personToRestore)
-         .onFailure { t -> handleErrorEvent(t)
-      }
-      _removedPerson = null
-      _removedPersonIndex = -1
+      undoItem(
+         currentList = _peopleUiStateFlow.value.people,
+         getId = { it.id },
+         removedItem = _removedPerson,
+         removedIndex = _removedPersonIndex,
+         updateUi = { restoredList, restoredId ->
+            updateState(_peopleUiStateFlow) { copy(people = restoredList, restoredPersonId = restoredId) }
+         },
+         persistCreate = { _repository.create(it) },
+         onReset = {
+            _removedPerson = null
+            _removedPersonIndex = -1
+         },
+         tag = TAG
+      )
    }
 
-   /** RESTORED (Optimistic-then-Persist)
-    * The UI has scrolled to the restored item and acknowledges this by sending PersonIntent.Restored.
-    * We then clear the ID in the PeopleUiState to avoid repeated scrolling on recomposition.
-    */
    private fun restored() {
       logDebug(TAG, "restored() acknowledged by UI")
       // The UI has finished scrolling, so we clear the ID
@@ -267,9 +243,7 @@ class PersonViewModel(
    }
    private fun cleanUp() {
       logDebug(TAG, "cleanUp()")
-      updateState(_peopleUiStateFlow) {
-         copy(isLoading = false, people = emptyList())
-      }
+      updateState(_peopleUiStateFlow) { copy(isLoading = false) }
    }
    // endregion
 
