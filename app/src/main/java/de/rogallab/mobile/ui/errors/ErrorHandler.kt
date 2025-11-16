@@ -3,11 +3,11 @@ package de.rogallab.mobile.ui.errors
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
-import de.rogallab.mobile.domain.utilities.logComp
 import de.rogallab.mobile.domain.utilities.logVerbose
 import de.rogallab.mobile.ui.base.BaseViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -25,7 +25,7 @@ fun ErrorHandler(
    val lifecycle = lifecycleOwner.lifecycle
 
    LaunchedEffect(viewModel, lifecycleOwner, lifecycle, snackbarHostState) {
-      logVerbose(tag, "lifecycleOwner:${lifecycleOwner.toString()}")
+      logVerbose(tag, "lifecycleOwner:$lifecycleOwner")
       logVerbose(tag, "lifecycle.State:${lifecycle.currentState}")
 
       lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -33,7 +33,7 @@ fun ErrorHandler(
          // when a new event is emitted.
          viewModel.errorFlow.collectLatest { errorState ->
             if (errorState == null) return@collectLatest
-            logVerbose(tag, "$errorState")
+            logVerbose(tag, "${errorState.toString()}")
             try {
                showError(snackbarHostState, errorState)
             } finally {

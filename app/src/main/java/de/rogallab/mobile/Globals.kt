@@ -6,8 +6,8 @@ object Globals {
    val directoryName = "android"
    val fileName = "people33.json"
 
-   val animationDuration = 2000
-   val snackbarDuration = SnackbarDuration.Long  // 10000 ms
+   val animationDuration = 1000
+   val snackbarDuration = SnackbarDuration.Indefinite  // 10000 ms
 
    var isDebug = true
    var isInfo = true

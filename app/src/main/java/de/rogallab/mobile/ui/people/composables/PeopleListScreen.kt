@@ -21,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -41,6 +42,7 @@ import de.rogallab.mobile.R
 import de.rogallab.mobile.domain.utilities.logComp
 import de.rogallab.mobile.domain.utilities.logDebug
 import de.rogallab.mobile.ui.base.composables.CollectBy
+import de.rogallab.mobile.ui.base.composables.ScrollToItemIfNotVisible
 import de.rogallab.mobile.ui.errors.ErrorHandler
 import de.rogallab.mobile.ui.errors.ErrorState
 import de.rogallab.mobile.ui.people.PeopleIntent
@@ -67,25 +69,21 @@ fun PeopleListScreen(
       viewModel.handlePeopleIntent(PeopleIntent.Fetch)
    }
 
-   val listState = rememberLazyListState()
-   val snackbarHostState = remember { SnackbarHostState() }
-
    // Scroll to the restored item only if it's not already visible
-   LaunchedEffect(peopleUiState.restoredPersonId) {
-      peopleUiState.restoredPersonId?.let { restoredId ->
-         val index = peopleUiState.people.indexOfFirst { it.id == restoredId }
-         if (index != -1) {
-            val visibleItems = listState.layoutInfo.visibleItemsInfo
-            val isVisible = visibleItems.any { it.index == index }
-            if (!isVisible) {
-               listState.animateScrollToItem(index)
-            }
-         }
-         // Acknowledge that the scroll is done
-         viewModel.handlePersonIntent(PersonIntent.Restored)
-      }
-   }
+   val listState = rememberLazyListState()
+   ScrollToItemIfNotVisible(
+      listState = listState,
+      targetKey = peopleUiState.restoredPersonId,
+      items = peopleUiState.people,
+      keyOf = { it.id },          // extract the ID from a Person
+      // Mark the restoration as consumed
+      acknowledge = { viewModel.handlePersonIntent(PersonIntent.Restored) },
+      animate = true,
+      scrollOffset = 0,
+      fullyVisible = false
+   )
 
+   val snackbarHostState = remember { SnackbarHostState() }
    Scaffold(
       contentColor = MaterialTheme.colorScheme.onBackground,
       contentWindowInsets = WindowInsets.safeDrawing,
@@ -163,17 +161,14 @@ fun PeopleListScreen(
                SwipePersonListItemWithUndo(
                   person = person,
                   onNavigate = { onNavigatePersonDetail(person.id) },
-                  onRemove = {
-                     viewModel.handlePersonIntent(PersonIntent.RemoveUndo(person))
-                  },
+                  onRemove = { viewModel.handlePersonIntent(PersonIntent.RemoveUndo(person)) },
                   onUndo = {
                      val errorState = ErrorState(
                         message = undoMessage,
                         actionLabel = undoActionLabel,
-                        onActionPerform = {
-                           viewModel.handlePersonIntent(PersonIntent.Undo)
-                        },
-                        withDismissAction = false
+                        onActionPerform = { viewModel.handlePersonIntent(PersonIntent.Undo) },
+                        withDismissAction = false,
+                        duration = SnackbarDuration.Long
                      )
                      viewModel.handlePersonIntent(PersonIntent.UndoEvent(errorState))
                   }
