@@ -35,7 +35,7 @@ val defModulesTest: Module = module {
    single<Seed> {
       Seed(
          _context = get<Context>(),
-         _isTest = false
+         _isTest = true
       )
    }
 

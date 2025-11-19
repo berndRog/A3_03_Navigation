@@ -9,6 +9,7 @@ import de.rogallab.mobile.domain.IPersonRepository
 import de.rogallab.mobile.domain.entities.Person
 import de.rogallab.mobile.test.TestApplication
 import de.rogallab.mobile.test.di.defModulesTest
+import de.rogallab.mobile.test.domain.utilities.setupConsoleLogger
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -58,10 +59,11 @@ class IPersonRepositoryUt : KoinTest {
    @Before
    fun setup() {
       // no logging during testing
-      Globals.isInfo = false
-      Globals.isDebug = false
+      Globals.isInfo = true
+      Globals.isDebug = true
       Globals.isVerbose = false
       Globals.isComp = false
+      setupConsoleLogger()
 
       // create seed after Koin has started
       _seedPeople = _seed.people.toList()

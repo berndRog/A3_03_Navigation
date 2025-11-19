@@ -139,7 +139,7 @@ class PersonViewModel(
    }
    private fun remove(person: Person) {
       logDebug(TAG, "removePerson()")
-      _repository.remove(_personUiStateFlow.value.person)
+      _repository.remove(person)
          .onSuccess { fetch() } // reread all people
          .onFailure { t -> handleErrorEvent(t) }
    }
@@ -241,6 +241,7 @@ class PersonViewModel(
          }
          .onFailure { t -> handleErrorEvent(t) }
    }
+
    private fun cleanUp() {
       logDebug(TAG, "cleanUp()")
       updateState(_peopleUiStateFlow) { copy(isLoading = false) }

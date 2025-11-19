@@ -127,6 +127,7 @@ dependencies {
    implementation(libs.gplay.location)
 
    // TESTS -----------------------
+   testImplementation(kotlin("test"))
    testImplementation(libs.junit)
 
    // androidx-test-core
@@ -140,6 +141,11 @@ dependencies {
    // Coroutines, Flow, StateFlow Testing
    testImplementation(libs.kotlinx.coroutines.test)
    testImplementation(libs.turbine.test)
+
+   // Mockito
+   testImplementation(libs.mockito.core)
+   testImplementation(libs.mockito.android)
+   testImplementation(libs.mockito.kotlin)
 
    // Roboelectric
    testImplementation(libs.robolectric.test)

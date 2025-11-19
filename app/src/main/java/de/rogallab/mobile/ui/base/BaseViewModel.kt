@@ -19,7 +19,7 @@ import kotlin.collections.toMutableList
 import kotlin.onFailure
 import kotlin.ranges.coerceAtMost
 
-open class BaseViewModel(
+abstract class BaseViewModel(
    private val _navHandler: INavHandler,
    private val _tag: String = "<-BaseViewModel"
 ): ViewModel() {
