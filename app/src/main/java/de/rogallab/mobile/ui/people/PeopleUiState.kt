@@ -5,7 +5,7 @@ import de.rogallab.mobile.domain.entities.Person
 
 @Immutable
 data class PeopleUiState(
-   val isLoading: Boolean = true,
+   val isLoading: Boolean = false,
    val people: List<Person> = emptyList(),
    val restoredPersonId: String? = null,
 )

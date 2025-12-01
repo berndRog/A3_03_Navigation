@@ -1,8 +1,12 @@
 package de.rogallab.mobile.ui.people
 
 import androidx.compose.material3.SnackbarDuration
+import androidx.lifecycle.viewModelScope
 import de.rogallab.mobile.domain.IPersonRepository
 import de.rogallab.mobile.domain.entities.Person
+import de.rogallab.mobile.domain.undoredo.SingleSlotUndoBuffer
+import de.rogallab.mobile.domain.undoredo.optimisticRemove
+import de.rogallab.mobile.domain.undoredo.optimisticUndoRemove
 import de.rogallab.mobile.domain.utilities.logDebug
 import de.rogallab.mobile.domain.utilities.newUuid
 import de.rogallab.mobile.ui.base.BaseViewModel
@@ -12,6 +16,7 @@ import de.rogallab.mobile.ui.navigation.PeopleList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class PersonViewModel(
    private val _repository: IPersonRepository,
@@ -54,7 +59,7 @@ class PersonViewModel(
          is PersonIntent.LastNameChange -> onLastNameChange(intent.lastName)
          is PersonIntent.EmailChange -> onEmailChange(intent.email)
          is PersonIntent.PhoneChange -> onPhoneChange(intent.phone)
-         is PersonIntent.ImagePathChange -> onImageChange(intent.uriString)
+         is PersonIntent.ImagePathChange -> onImagePathChange(intent.uriString)
 
          is PersonIntent.Clear -> clearState()
          is PersonIntent.FetchById -> fetchById(intent.id)
@@ -73,31 +78,35 @@ class PersonViewModel(
    // endregion
 
    // region Input updates (immutable copy, trimmed) -----------------------------------------------
-   private fun onFirstNameChange(firstName: String) =
-      updateState(_personUiStateFlow) {
-         copy(person = person.copy(firstName = firstName.trim()))
-      }
-   private fun onLastNameChange(lastName: String) =
-      updateState(_personUiStateFlow) {
-         copy(person = person.copy(lastName = lastName.trim()))
-      }
-   private fun onEmailChange(email: String?) =
-      updateState(_personUiStateFlow) {
-         copy(person = person.copy(email = email?.trim()))
-      }
-   private fun onPhoneChange(phone: String?) =
-      updateState(_personUiStateFlow) {
-         copy(person = person.copy(phone = phone?.trim()))
-      }
-   private fun onImageChange(uriString: String?) =
-      updateState(_personUiStateFlow) {
-         copy(person = person.copy(imagePath = uriString?.trim()))
-      }
+   private fun onFirstNameChange(firstName: String) {
+      val trimmed = firstName.trim()
+      if(trimmed == _personUiStateFlow.value.person.firstName) return
+      updateState(_personUiStateFlow) { copy(person = person.copy(firstName = trimmed)) }
+   }
+   private fun onLastNameChange(lastName: String) {
+      val trimmed = lastName.trim()
+      if (trimmed == _personUiStateFlow.value.person.lastName) return
+      updateState(_personUiStateFlow) { copy(person = person.copy(lastName = lastName.trim())) }
+   }
+   private fun onEmailChange(email: String?) {
+      var trimmed = email?.trim()
+      if (trimmed == _personUiStateFlow.value.person.email) return
+      updateState(_personUiStateFlow) { copy(person = person.copy(email = email?.trim())) }
+   }
+   private fun onPhoneChange(phone: String?) {
+      val trimmed = phone?.trim()
+      if (trimmed == _personUiStateFlow.value.person.phone) return
+      updateState(_personUiStateFlow) { copy(person = person.copy(phone = trimmed)) }
+   }
+   private fun onImagePathChange(uriString: String?) {
+      val trimmed = uriString?.trim()
+      if (trimmed == _personUiStateFlow.value.person.imagePath) return
+      updateState(_personUiStateFlow) { copy(person = person.copy(imagePath = trimmed)) }
+   }
+
    // clear person state and prepare for new person input
    private fun clearState() =
-      updateState(_personUiStateFlow) {
-         copy(person = Person(id = newUuid() ))
-      }
+      updateState(_personUiStateFlow) { copy(person = Person(id = newUuid())) }
    // endregion
 
    // region Fetch by id (error → navigate back to list) -------------------------------------------
@@ -146,46 +155,112 @@ class PersonViewModel(
    // endregion
 
    // region Single-slot UNDO buffer ---------------------------------------------------------------
-   private var _removedPerson: Person? = null
-   private var _removedPersonIndex: Int = -1 // Store only the index
-
+   /**
+    * Single-slot undo buffer for the last removed Person.
+    *
+    * This buffer stores:
+    *  - the removed Person instance
+    *  - the index from which it was removed
+    */
+   private var _undoBuffer = SingleSlotUndoBuffer<Person>()
+   /**
+    * Removes a person using the "Optimistic-then-Persist" pattern.
+    *
+    * Optimistic:
+    *  - The UI list is updated immediately so the UI feels instant.
+    *  - The removed item and index are stored in the undo buffer.
+    *
+    * Then-Persist:
+    *  - The actual repository deletion happens in the background.
+    *  - If persistence fails, an error event is emitted.
+    */
    private fun removeUndo(person: Person) {
-      logDebug(TAG, "removePerson()")
-      removeItem(
+      logDebug(TAG, "removeUndo(${person.id})")
+
+      val currentList = _peopleUiStateFlow.value.people
+
+      // 1) Pure helper: perform optimistic list change and build undo buffer
+      val (updatedList, newBuffer) = optimisticRemove(
+         list = currentList,
          item = person,
-         currentList = _peopleUiStateFlow.value.people,
          getId = { it.id },
-         onRemovedItem = { _removedPerson = it as? Person },
-         onRemovedItemIndex = { _removedPersonIndex = it },
-         updateUi = { updatedList ->
-            updateState(_peopleUiStateFlow) { copy(people = updatedList) }
-         },
-         persistRemove = { _repository.remove(it) },
-         tag = TAG
+         undoBuffer = _undoBuffer
       )
-   }
 
+      // If nothing changed (item not found), stop here
+      if (updatedList === currentList) return
+
+      // 2) Update undo buffer
+      _undoBuffer = newBuffer
+
+      // 3) Immediately update UI state (Optimistic)
+      updateState(_peopleUiStateFlow) { copy(people = updatedList) }
+
+      // 4) Persist removal asynchronously (Then-Persist)
+      viewModelScope.launch {
+         logDebug(TAG, "persistRemove(${person.id})")
+         _repository.remove(person)
+            .onFailure { t -> handleErrorEvent(t) }
+      }
+   }
+   /**
+    * Undoes the last removed person using the pure helper.
+    *
+    * Optimistic:
+    *  - The item is reinserted immediately into the UI list.
+    *  - The undo buffer is cleared.
+    * Then-Persist:
+    *  - The Person is recreated in the repository in the background.
+    *
+    * If the Person was already present in the list (rare edge case),
+    * only the buffer is cleared and no repository call is made.
+    */
    private fun undoRemove() {
-      undoItem(
-         currentList = _peopleUiStateFlow.value.people,
-         getId = { it.id },
-         removedItem = _removedPerson,
-         removedIndex = _removedPersonIndex,
-         updateUi = { restoredList, restoredId ->
-            updateState(_peopleUiStateFlow) { copy(people = restoredList, restoredPersonId = restoredId) }
-         },
-         persistCreate = { _repository.create(it) },
-         onReset = {
-            _removedPerson = null
-            _removedPersonIndex = -1
-         },
-         tag = TAG
-      )
-   }
+      logDebug(TAG, "undoRemove()")
 
+      val currentList = _peopleUiStateFlow.value.people
+
+      // 1) Pure helper: restore from undo buffer
+      val result = optimisticUndoRemove(
+         list = currentList,
+         getId = { it.id },
+         undoBuffer = _undoBuffer
+      )
+
+      // Extract results
+      val updatedList = result.updatedList
+      val restoredId = result.restoredId
+
+      // 2) Clear or update undo buffer
+      _undoBuffer = result.newBuffer
+
+      // If nothing changed, stop here
+      if (updatedList === currentList && restoredId == null) return
+
+      // 3) Update UI state immediately (Optimistic)
+      updateState(_peopleUiStateFlow) {
+         copy(people = updatedList, restoredPersonId = restoredId) }
+
+      // 4) Persist recreation in the background (Then-Persist)
+      if (restoredId != null) {
+         val restoredPerson = updatedList.firstOrNull { it.id == restoredId }
+         if (restoredPerson != null) {
+            viewModelScope.launch {
+               logDebug(TAG, "persistCreate(${restoredPerson.id})")
+               _repository.create(restoredPerson)
+                  .onFailure { t -> handleErrorEvent(t) }
+            }
+         }
+      }
+   }
+   /**
+    * Called by the UI (e.g., LazyColumn) once the scroll animation
+    * to `restoredPersonId` has finished.
+    *
+    * This clears the flag so future restore operations can update it again.
+    */
    private fun restored() {
       logDebug(TAG, "restored() acknowledged by UI")
-      // The UI has finished scrolling, so we clear the ID
       updateState(_peopleUiStateFlow) { copy(restoredPersonId = null) }
    }
    // endregion
